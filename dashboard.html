@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abhishek Trading Platform - Live Recommendations</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .update-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .long-signals h2 { border-color: #10b981; }
+        .short-signals h2 { border-color: #ef4444; }
+        
+        .stock-card {
+            background: #f8f9fa;
+            border-left: 5px solid #10b981;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        
+        .stock-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .short-card {
+            border-left-color: #ef4444;
+        }
+        
+        .stock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stock-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .signal-type {
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .long { background: #10b981; }
+        .short { background: #ef4444; }
+        
+        .stock-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .detail-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .positive { color: #10b981; }
+        .negative { color: #ef4444; }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .stock-details { grid-template-columns: 1fr; }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Abhishek Trading Platform</h1>
+            <p>Live Stock Recommendations</p>
+            <p class="update-time" id="updateTime">Loading...</p>
+        </header>
+        
+        <div class="loading" id="loading">Loading recommendations...</div>
+        
+        <div id="content" style="display:none;">
+            <div class="section long-signals">
+                <h2>🟢 Long Signals (Buy)</h2>
+                <div id="longSignals"></div>
+            </div>
+            
+            <div class="section short-signals">
+                <h2>🔴 Short Signals (Sell)</h2>
+                <div id="shortSignals"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load recommendations from JSON file
+        async function loadRecommendations() {
+            try {
+                // Load data (you'll generate this JSON file daily)
+                const response = await fetch('recommendations.json');
+                const data = await response.json();
+                
+                document.getElementById('updateTime').textContent = 
+                    `Last Updated: ${data.timestamp}`;
+                
+                // Render long signals
+                renderSignals(data.long_signals, 'longSignals', 'long');
+                
+                // Render short signals
+                renderSignals(data.short_signals, 'shortSignals', 'short');
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('loading').innerHTML = 
+                    '❌ Failed to load recommendations. Please try again later.';
+                console.error('Error loading data:', error);
+            }
+        }
+        
+        function renderSignals(signals, containerId, type) {
+            const container = document.getElementById(containerId);
+            
+            if (signals.length === 0) {
+                container.innerHTML = '<p>No signals today</p>';
+                return;
+            }
+            
+            container.innerHTML = signals.map(stock => `
+                <div class="stock-card ${type === 'short' ? 'short-card' : ''}">
+                    <div class="stock-header">
+                        <span class="stock-name">${stock.ticker.replace('.NS', '')}</span>
+                        <span class="signal-type ${type}">${type.toUpperCase()}</span>
+                    </div>
+                    <div class="stock-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Entry Price</div>
+                            <div class="detail-value">₹${stock.entry.toFixed(2)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Target</div>
+                            <div class="detail-value positive">₹${stock.target.toFixed(2)}</div>
+                            <div class="detail-label">(${stock.gain_percent.toFixed(2)}%)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Stop Loss</div>
+                            <div class="detail-value negative">₹${stock.stop.toFixed(2)}</div>
+                            <div class="detail-label">(${stock.loss_percent.toFixed(2)}%)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">R:R Ratio</div>
+                            <div class="detail-value">1:${stock.risk_reward.toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Load on page load
+        loadRecommendations();
+        
+        // Auto-refresh every 5 minutes
+        setInterval(loadRecommendations, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
