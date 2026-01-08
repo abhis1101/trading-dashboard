@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-01-09 09:00:00 IST",
+  "long_signals": [
+    {
+      "ticker": "TCS",
+      "entry": 3295.60,
+      "target": 3522.10,
+      "stop": 3205.00,
+      "gain_percent": 6.87,
+      "loss_percent": -2.75,
+      "risk_reward": 2.50
+    },
+    {
+      "ticker": "INFY",
+      "entry": 1639.00,
+      "target": 1739.00,
+      "stop": 1599.00,
+      "gain_percent": 6.10,
+      "loss_percent": -2.44,
+      "risk_reward": 2.50
+    }
+  ],
+  "short_signals": [
+    {
+      "ticker": "TATASTEEL",
+      "entry": 150.00,
+      "target": 138.00,
+      "stop": 153.75,
+      "gain_percent": 8.00,
+      "loss_percent": -2.50,
+      "risk_reward": 3.20
+    }
+  ]
+}
